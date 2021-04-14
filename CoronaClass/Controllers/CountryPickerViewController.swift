@@ -6,13 +6,18 @@
 //
 
 import UIKit
+import JGProgressHUD
 
-class CountryPickerViewController: UIViewController {
+class CountryPickerViewController: UIViewController, DisplayHudProtocol {
+    
+    
     
     @IBOutlet weak var navigationHolderView: UIView!
     @IBOutlet weak var tableView: UITableView!
     
     private var countries = [Country]()
+    
+    var hud: JGProgressHUD?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,8 +25,6 @@ class CountryPickerViewController: UIViewController {
         setupTableView()
         fetchCountries()
     }
-    
-    
     
     private func addNavigationView() {
         let navigationView = NavigationView(state: .backAndTitle, delegate: self, title: "Add Country")
@@ -34,11 +37,16 @@ class CountryPickerViewController: UIViewController {
     private func setupTableView() {
         tableView.tableFooterView = UIView()
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "CountryCell")
+        tableView.rowHeight = 80
+        tableView.separatorColor = UIColor(hex: "EDEDED")
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        tableView.register(CountryTableViewCell.self, forCellReuseIdentifier: CountryTableViewCell.reuseIdentifier)
     }
     
     private func fetchCountries() {
+        displayHud(true)
         APIManager.shared.getAllCountries { [weak self] result in
+            self?.displayHud(false)
             switch result {
             case .failure(let error):
                 print(error.localizedDescription)
@@ -62,11 +70,15 @@ extension CountryPickerViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CountryCell")
+        let cell = tableView.dequeueReusableCell(withIdentifier: CountryTableViewCell.reuseIdentifier) as! CountryTableViewCell
         let country = countries[indexPath.row]
-        cell?.textLabel?.text = country.name
-        return cell!
+        cell.setupCellData(country: country)
+        return cell
     }
-    
-    
+}
+extension CountryPickerViewController: CountrySelectionDelegate {
+    func didChangeValueOn(country: Country) {
+        guard let index = countries.firstIndex(where: {$0.isoCode == country.isoCode}) else {return}
+        tableView.reloadRows(at: [IndexPath(item: index, section: 0)], with: .none)
+    }
 }
