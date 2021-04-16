@@ -12,6 +12,8 @@ class CountryCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var lblCountryName: UILabel!
     @IBOutlet weak var lblCasesNumber: UILabel!
     
+    var country: Country?
+    
     func setupCell() {
         shadowView.layer.cornerRadius = 8
         shadowView.layer.shadowColor = UIColor.black.withAlphaComponent(0.05).cgColor
@@ -20,5 +22,27 @@ class CountryCollectionViewCell: UICollectionViewCell {
         shadowView.layer.shadowOffset = CGSize(width: 0, height: 2)
         contentView.layer.cornerRadius = 8
         contentView.layer.masksToBounds = true
+    }
+    
+    func setCountryData(_ country: Country) {
+        self.country = country
+        lblCountryName.text = country.name
+        getConfirmedCases(country)
+    }
+    
+    private func getConfirmedCases(_ country: Country) {
+        APIManager.shared.getConfirmedCases(for: country.slug) { result in
+            switch result {
+            case .failure(let error):
+                print(error.localizedDescription)
+            case .success(let casesByDay):
+                print(casesByDay.count)
+                
+                let sorted = casesByDay.sorted(by: {$0.date > $1.date })
+                if let today = sorted.first {
+                    self.lblCasesNumber.text = "\(today.cases)"
+                }
+            }
+        }
     }
 }

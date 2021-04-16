@@ -9,11 +9,8 @@ import UIKit
 import SnapKit
 import JGProgressHUD
 
-class HomeViewController: UIViewController, DisplayHudProtocol {
+class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
   
-    var hud: JGProgressHUD?
-    
-
     @IBOutlet weak var navigationHolderView: UIView!
     @IBOutlet weak var globalHolderView: UIView!
     @IBOutlet weak var confirmed: UILabel!
@@ -24,14 +21,20 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
     
     @IBOutlet weak var collectionView: UICollectionView!
     
+    private var selectedCountries = [Country]()
+    private(set) var allCountries = [Country]()
+    
+    var hud: JGProgressHUD?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         addNavigationView()
         setupGlobalHolder()
         getGlobalData()
+        collectionView.delegate = self
         collectionView.dataSource = self
-        if let layout = collectionView.collectionViewLayout as? UICollectionViewLayout {
-            
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.itemSize = CGSize(width: 165, height: 70)
         }
         fetchCountries()
     }
@@ -39,9 +42,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
     
     private func addNavigationView() {
         let navigationView = NavigationView(state: .onlyTitle, delegate: nil, title: "Dashboard")
-        
         navigationHolderView.addSubview(navigationView)
-        
         navigationView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
@@ -55,6 +56,10 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
         globalHolderView.layer.shadowOffset = CGSize(width: 0, height: 2)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
     private func getGlobalData() {
         displayHud(true)
         APIManager.shared.getGlobalInfo { [weak self] result in
@@ -63,14 +68,13 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
             switch result {
             case .failure(let error):
                 self.buttonRetry.isHidden = false
-                print(error.localizedDescription)
+                self.showErrorAlert(error)
             case .success(let global):
                 self.buttonRetry.isHidden = true
                 self.setGlobalData(global: global)
             }
         }
     }
-    private var selectedCountries = [Country]()
     
     private func fetchCountries() {
         displayHud(true)
@@ -78,15 +82,14 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
             self?.displayHud(false)
             switch result {
             case .failure(let error):
-                print(error.localizedDescription)
+                self?.showErrorAlert(error)
             case .success(let countries):
-                self?.selectedCountries = countries.filter {$0.isSelected}
-                self?.collectionView.reloadData()
+                self?.allCountries = countries
+                self?.reloadCountriesData()
             }
         }
     }
 
-    
     private func setGlobalData(global: Global) {
         deaths.text = global.deaths.getFormattedNumber()
         recovered.text = (global.recovered).getFormattedNumber()
@@ -118,6 +121,19 @@ class HomeViewController: UIViewController, DisplayHudProtocol {
         getGlobalData()
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "countriesSegue" {
+            let controller = segue.destination as! CountryPickerViewController
+            controller.delegate = self
+        }
+    }
+}
+
+extension HomeViewController: ReloadDataDelegate {
+    func reloadCountriesData() {
+        selectedCountries = allCountries.filter {$0.isSelected}
+        collectionView.reloadData()
+    }
 }
 
 extension HomeViewController: UICollectionViewDataSource {
@@ -129,10 +145,25 @@ extension HomeViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CountryCell", for: indexPath) as! CountryCollectionViewCell
         let country = selectedCountries[indexPath.row]
-        cell.lblCountryName.text = country.name
-        cell.lblCasesNumber.text = "0"
         cell.setupCell()
+        cell.setCountryData(country)
         return cell
     }
 }
 
+extension HomeViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 165, height: 70)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+}
