@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9169565E262DE7BE00C8812B /* EndPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9169565D262DE7BE00C8812B /* EndPoint.swift */; };
+		91695661262DECFE00C8812B /* WebService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91695660262DECFE00C8812B /* WebService.swift */; };
+		91695664262DFBBA00C8812B /* CountriesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91695663262DFBBA00C8812B /* CountriesAPI.swift */; };
+		91695667262DFCC100C8812B /* CountryAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91695666262DFCC100C8812B /* CountryAPI.swift */; };
+		9169566A262E03B500C8812B /* GlobalAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91695669262E03B500C8812B /* GlobalAPI.swift */; };
 		916FCBCD2620B4D400880D1F /* CountryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 916FCBCC2620B4D400880D1F /* CountryTableViewCell.swift */; };
 		916FCBD32620C94A00880D1F /* JGProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 916FCBD22620C94A00880D1F /* JGProgressHUD */; };
 		916FCBD72620C9F000880D1F /* DisplayHudProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 916FCBD62620C9F000880D1F /* DisplayHudProtocol.swift */; };
@@ -34,6 +39,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9169565D262DE7BE00C8812B /* EndPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndPoint.swift; sourceTree = "<group>"; };
+		91695660262DECFE00C8812B /* WebService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebService.swift; sourceTree = "<group>"; };
+		91695663262DFBBA00C8812B /* CountriesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountriesAPI.swift; sourceTree = "<group>"; };
+		91695666262DFCC100C8812B /* CountryAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryAPI.swift; sourceTree = "<group>"; };
+		91695669262E03B500C8812B /* GlobalAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalAPI.swift; sourceTree = "<group>"; };
 		916FCBCC2620B4D400880D1F /* CountryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryTableViewCell.swift; sourceTree = "<group>"; };
 		916FCBD62620C9F000880D1F /* DisplayHudProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayHudProtocol.swift; sourceTree = "<group>"; };
 		9193FE062627507B006E8D86 /* Alertable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alertable.swift; sourceTree = "<group>"; };
@@ -118,6 +128,7 @@
 		91BE56D5261E121C00FDAB54 /* CoronaClass */ = {
 			isa = PBXGroup;
 			children = (
+				91BE5706261E23D400FDAB54 /* Models */,
 				91AA3F792626127100A44CE4 /* CollectionCells */,
 				916FCBD52620C9D000880D1F /* Protocols */,
 				91BE5708261E23F900FDAB54 /* Views */,
@@ -147,8 +158,12 @@
 		91BE5705261E23CA00FDAB54 /* API */ = {
 			isa = PBXGroup;
 			children = (
-				91BE5706261E23D400FDAB54 /* Models */,
 				91BE570A261E24B600FDAB54 /* APIManager.swift */,
+				9169565D262DE7BE00C8812B /* EndPoint.swift */,
+				91695660262DECFE00C8812B /* WebService.swift */,
+				91695666262DFCC100C8812B /* CountryAPI.swift */,
+				91695663262DFBBA00C8812B /* CountriesAPI.swift */,
+				91695669262E03B500C8812B /* GlobalAPI.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -265,6 +280,7 @@
 				91AA3F732625FAB000A44CE4 /* GlobalResponse.swift in Sources */,
 				91AA3F76262603E800A44CE4 /* Int64Extensions.swift in Sources */,
 				916FCBCD2620B4D400880D1F /* CountryTableViewCell.swift in Sources */,
+				91695667262DFCC100C8812B /* CountryAPI.swift in Sources */,
 				9193FE0D26275556006E8D86 /* ConfirmedCasesByDay.swift in Sources */,
 				91AA3F7C262612B900A44CE4 /* CountryCollectionViewCell.swift in Sources */,
 				91BE56D7261E121C00FDAB54 /* AppDelegate.swift in Sources */,
@@ -273,12 +289,16 @@
 				91BE56FE261E1FF800FDAB54 /* UIColor.swift in Sources */,
 				91BE56D9261E121C00FDAB54 /* SceneDelegate.swift in Sources */,
 				916FCBD72620C9F000880D1F /* DisplayHudProtocol.swift in Sources */,
+				9169565E262DE7BE00C8812B /* EndPoint.swift in Sources */,
 				9193FE072627507B006E8D86 /* Alertable.swift in Sources */,
 				91BE56FB261E168300FDAB54 /* NavigationView.swift in Sources */,
+				9169566A262E03B500C8812B /* GlobalAPI.swift in Sources */,
 				9193FE0A26275194006E8D86 /* UIAlertController+Extensions.swift in Sources */,
 				91BE570E261E24E000FDAB54 /* Country.swift in Sources */,
 				91BE56F1261E134C00FDAB54 /* HomeViewController.swift in Sources */,
 				91BE56F4261E14C200FDAB54 /* CountryPickerViewController.swift in Sources */,
+				91695661262DECFE00C8812B /* WebService.swift in Sources */,
+				91695664262DFBBA00C8812B /* CountriesAPI.swift in Sources */,
 				91BE570B261E24B600FDAB54 /* APIManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -12,27 +12,32 @@ protocol ReloadDataDelegate: AnyObject {
     func reloadCountriesData()
 }
 
-class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertable {
+class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertable, UISearchControllerDelegate {
     
-    
-    
+    //MARK: - UI elements
     @IBOutlet weak var navigationHolderView: UIView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var segmenControl: UISegmentedControl!
     @IBOutlet weak var searchHolderView: UIView!
     
-    private var countries = [Country]()
-    
-    weak var delegate: ReloadDataDelegate?
-    
-    var hud: JGProgressHUD?
-    
     private var searchController = UISearchController(searchResultsController: nil)
     
+    //This is the same as APIManager Class
+    private let api = WebServices()
+    
+    //MARK: - Variable delegate
+    weak var delegate: ReloadDataDelegate?
+    
+    //MARK: - Variables
+    private var countries = [Country]()
+    var hud: JGProgressHUD?
+    var userDidTapSearch = false
+    
+    //MARK: - Country data source variable
     var countriesDataSource: [Country] {
         if segmenControl.selectedSegmentIndex == 0 {
             guard let searchText = searchController.searchBar.text else {
-               return  countries
+                return  countries
             }
             return countries.filter {$0.name.lowercased().hasPrefix(searchText.lowercased())}
         } else {
@@ -43,6 +48,7 @@ class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertab
         }
     }
     
+    //MARK: - View life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         addNavigationView()
@@ -52,12 +58,20 @@ class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertab
         setupSearchController()
     }
     
+    //MARK: - UI elements setup
     private func addNavigationView() {
         let navigationView = NavigationView(state: .backAndTitle, delegate: self, title: "Add Country")
         navigationHolderView.addSubview(navigationView)
         navigationView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
+    
+    //MARK: - Segment control setup
+    private func configureSegmentControl() {
+        segmenControl.setBackgroundImage(nil, for: .normal, barMetrics: .compact)
+        segmenControl.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
+        segmenControl.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
     }
     
     private func setupTableView() {
@@ -70,9 +84,26 @@ class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertab
         tableView.register(CountryTableViewCell.self, forCellReuseIdentifier: CountryTableViewCell.reuseIdentifier)
     }
     
+    private func setupSearchController() {
+        searchHolderView.layer.cornerRadius = 25
+        searchHolderView.layer.masksToBounds = true
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = "Search Countries"
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.automaticallyShowsCancelButton = false
+        searchController.definesPresentationContext = true
+        searchController.extendedLayoutIncludesOpaqueBars = true
+        searchHolderView.addSubview(searchController.searchBar)
+        searchController.delegate = self
+        searchHolderView.clipsToBounds = true
+    }
+    
+    
+    //MARK: - Fetch countries
     private func fetchCountries() {
         displayHud(true)
-        APIManager.shared.getAllCountries { [weak self] result in
+        api.request(CountriesAPI.getAllCountries) { [weak self] (_ result: Result<[Country], Error>) -> Void in
             self?.displayHud(false)
             switch result {
             case .failure(let error):
@@ -82,37 +113,27 @@ class CountryPickerViewController: UIViewController, DisplayHudProtocol, Alertab
                 self?.tableView.reloadData()
             }
         }
-    }
-    
-    private func configureSegmentControl() {
-        segmenControl.setBackgroundImage(nil, for: .normal, barMetrics: .compact)
         
-        segmenControl.setTitleTextAttributes([
-                                                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.white], for: .selected)
-        segmenControl.setTitleTextAttributes([
-                                                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .regular), NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
+//        displayHud(true)
+//        APIManager.shared.getAllCountries { [weak self] result in
+//            self?.displayHud(false)
+//            switch result {
+//            case .failure(let error):
+//                self?.showErrorAlert(error)
+//            case .success(let countries):
+//                self?.countries = countries.sorted(by: {$0.name < $1.name})
+//                self?.tableView.reloadData()
+//            }
+//        }
     }
     
+    //MARK: - Segment control action
     @IBAction func onSegmentChanged(_ segmentControl: UISegmentedControl) {
         tableView.reloadData()
     }
-    
-    private func setupSearchController() {
-        searchHolderView.layer.cornerRadius = 25
-        searchHolderView.layer.masksToBounds = true
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.placeholder = "Search Countries"
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.hidesNavigationBarDuringPresentation = false
-        searchHolderView.addSubview(searchController.searchBar)
-        searchController.extendedLayoutIncludesOpaqueBars = true
-        searchController.automaticallyShowsCancelButton = false
-        searchController.definesPresentationContext = true
-        searchController.extendedLayoutIncludesOpaqueBars = true
-        searchHolderView.clipsToBounds = true
-    }
 }
 
+//MARK: - Extension Navigation View delegate
 extension CountryPickerViewController: NavigationViewDelegate {
     func didTapBack() {
         searchController.isActive = false
@@ -120,6 +141,7 @@ extension CountryPickerViewController: NavigationViewDelegate {
     }
 }
 
+//MARK: - Extension Data Source
 extension CountryPickerViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         countriesDataSource.count
@@ -136,6 +158,8 @@ extension CountryPickerViewController: UITableViewDataSource {
         return cell
     }
 }
+
+//MARK: - Extension Country Selection Protocol
 extension CountryPickerViewController: CountrySelectionDelegate {
     func didChangeValueOn(country: Country) {
         delegate?.reloadCountriesData()
@@ -146,6 +170,7 @@ extension CountryPickerViewController: CountrySelectionDelegate {
     }
 }
 
+//MARK: - Extension SearchController result update
 extension CountryPickerViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         tableView.reloadData()

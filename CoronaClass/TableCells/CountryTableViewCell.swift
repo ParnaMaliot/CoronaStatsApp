@@ -14,6 +14,7 @@ protocol CountrySelectionDelegate: AnyObject {
 
 class CountryTableViewCell: UITableViewCell {
     
+    //MARK: - UI Elements
     private lazy var lblTitle: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
@@ -28,10 +29,13 @@ class CountryTableViewCell: UITableViewCell {
         return switchControl
     }()
     
-    weak var delegate: CountrySelectionDelegate?
+    //MARK: - Variables
     private var country: Country?
     
-    
+    //MARK: - Variable delegate
+    weak var delegate: CountrySelectionDelegate?
+
+    //MARK: - Cell init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
@@ -42,6 +46,7 @@ class CountryTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been initiliazied")
     }
     
+    //MARK: - Setup views
     private func setupViews() {
         contentView.addSubview(lblTitle)
         contentView.addSubview(switchControl)
@@ -59,6 +64,7 @@ class CountryTableViewCell: UITableViewCell {
         }
     }
     
+    //MARK: - 
     func setupCellData(country: Country) {
         self.country = country
         lblTitle.text = country.name

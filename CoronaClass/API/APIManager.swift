@@ -19,6 +19,7 @@ class APIManager {
     static let shared = APIManager()
     private init() {}
  
+    //MARK - Get all countries data
     func getAllCountries(completion: @escaping CountriesResultsCompletion) {
         AF.request(url).responseDecodable(of: [Country].self) { response  in
             switch response.result {
@@ -29,7 +30,8 @@ class APIManager {
             }
         }
     }
-    
+
+    //MARK: - Get global stats
     func getGlobalInfo(completion: @escaping GlobalInfoCompletion) {
         AF.request("https://api.covid19api.com/summary", method: .get).responseDecodable(of: GlobalResponse.self) { response  in
             switch response.result {
@@ -41,6 +43,7 @@ class APIManager {
         }
     }
     
+    //MARK: - Fetch confirmed cases
     func getConfirmedCases(for country: String, from: Date? = nil, to: Date? = nil, completion: @escaping ConfirmedCasesByDayCompletion) {
         let fetchTodayDate = (from == nil && to == nil) ? Date().minus(days: 1) : nil
         var urlString = "https://api.covid19api.com/country/" + country + "/status/confirmed/live?"

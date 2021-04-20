@@ -10,7 +10,7 @@ import SnapKit
 import JGProgressHUD
 
 class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
-  
+    //MARK: - UI navigation elements
     @IBOutlet weak var navigationHolderView: UIView!
     @IBOutlet weak var globalHolderView: UIView!
     @IBOutlet weak var confirmed: UILabel!
@@ -18,14 +18,17 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
     @IBOutlet weak var recovered: UILabel!
     @IBOutlet weak var buttonRetry: UIButton!
     @IBOutlet weak var lblConfirmedInfo: UILabel!
-    
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var addCountry: UIButton!
     
+    //MARK: - Variables
     private var selectedCountries = [Country]()
     private(set) var allCountries = [Country]()
+    private let api = WebServices()
     
     var hud: JGProgressHUD?
-
+    
+    //MARK: - View life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         addNavigationView()
@@ -39,7 +42,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
         fetchCountries()
     }
     
-    
+    //MARK: - UI elements setup
     private func addNavigationView() {
         let navigationView = NavigationView(state: .onlyTitle, delegate: nil, title: "Dashboard")
         navigationHolderView.addSubview(navigationView)
@@ -60,22 +63,35 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
         super.viewDidAppear(animated)
     }
     
+    //MARK: - Fetch global data
     private func getGlobalData() {
         displayHud(true)
-        APIManager.shared.getGlobalInfo { [weak self] result in
-            guard let self = self else {return}
-            self.displayHud(false)
+        api.request(GlobalAPI.getSummary) { [weak self] (_ result: Result<GlobalResponse, Error>) in
+            self?.displayHud(false)
             switch result {
             case .failure(let error):
-                self.buttonRetry.isHidden = false
-                self.showErrorAlert(error)
-            case .success(let global):
-                self.buttonRetry.isHidden = true
-                self.setGlobalData(global: global)
+                self?.buttonRetry.isHidden = false
+                self?.showErrorAlert(error)
+            case .success(let globalResponse):
+                self?.buttonRetry.isHidden = true
+                self?.setGlobalData(global: globalResponse.global)
             }
         }
+        
+//        APIManager.shared.getGlobalInfo { [weak self] result in
+//            guard let self = self else {return}
+//            switch result {
+//            case .failure(let error):
+//                self.buttonRetry.isHidden = false
+//                self.showErrorAlert(error)
+//            case .success(let global):
+//                self.buttonRetry.isHidden = true
+//                self.setGlobalData(global: global)
+//            }
+//        }
     }
     
+    //MARK: - Fetch countries data
     private func fetchCountries() {
         displayHud(true)
         APIManager.shared.getAllCountries { [weak self] result in
@@ -89,7 +105,8 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
             }
         }
     }
-
+    
+    //MARK: - Feeding UI elements with data
     private func setGlobalData(global: Global) {
         deaths.text = global.deaths.getFormattedNumber()
         recovered.text = (global.recovered).getFormattedNumber()
@@ -97,6 +114,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
         setFormattedLastUpdate()
     }
     
+    //MARK: - Date formater setup
     private func setFormattedLastUpdate() {
         let date = Date()
         let dateFormatter = DateFormatter()
@@ -111,8 +129,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
         lblConfirmedInfo.attributedText = attributed
     }
     
-    @IBOutlet weak var addCountry: UIButton!
-    
+    //MARK: - Buttons actions
     @IBAction func btnAddCountry(_ sender: UIButton) {
         performSegue(withIdentifier: "countriesSegue", sender: nil)
     }
@@ -121,6 +138,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
         getGlobalData()
     }
     
+    //MARK: - Prepare for segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "countriesSegue" {
             let controller = segue.destination as! CountryPickerViewController
@@ -129,6 +147,7 @@ class HomeViewController: UIViewController, DisplayHudProtocol, Alertable {
     }
 }
 
+//MARK: - Extension Reload Data delegata
 extension HomeViewController: ReloadDataDelegate {
     func reloadCountriesData() {
         selectedCountries = allCountries.filter {$0.isSelected}
@@ -136,6 +155,7 @@ extension HomeViewController: ReloadDataDelegate {
     }
 }
 
+//MARK: - Extension Collection View data source
 extension HomeViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -151,6 +171,7 @@ extension HomeViewController: UICollectionViewDataSource {
     }
 }
 
+//MARK: - Extension Collection View FlowLayout delegata
 extension HomeViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
